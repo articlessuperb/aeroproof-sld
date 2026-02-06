@@ -4,6 +4,8 @@
 
 AeroProof Enterprise is a proprietary, high-integrity visual command center designed to provide **South London Drones Ltd** with a "Gold Standard" liability shield and real-time tactical oversight of drone operations across South London and Surrey.
 
+Still under development but progress can be seen on Streamlit here: https://aeroproof-sld-ohuafwebmnpczrneexba3e.streamlit.app/
+
 ---
 
 ## 🚀 Key Capabilities
