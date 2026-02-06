@@ -60,4 +60,8 @@ with col2:
 # --- 7. THE MAP (RAIN RADAR SIMULATION) ---
 st.subheader("Live Rain Radar: Sutton & Croydon Sector")
 m = folium.Map(location=[51.36, -0.19], zoom_start=12)
-folium.Marker([51.36, -0.19], popup="Sutton Base",
+
+# Ensure this entire line is intact:
+folium.Marker([51.36, -0.19], popup="Sutton Base", icon=folium.Icon(color='blue')).add_to(m)
+
+st_folium(m, width=700, height=500)
