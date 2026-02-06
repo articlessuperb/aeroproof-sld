@@ -73,3 +73,67 @@ if not st.session_state["auth"]:
         
         if st.button("Log In", type="primary"):
             if password == pass_key:
+                st.session_state["auth"] = True
+                st.rerun()
+            else:
+                st.error("Invalid Credentials")
+    st.stop()
+
+# --- 4. MAIN DASHBOARD ---
+with st.sidebar:
+    st.header("System Controls")
+    st.write("Current Session: Active")
+    if st.button("🔴 Logout / Lock System", type="secondary", use_container_width=True):
+        st.session_state["auth"] = False
+        st.rerun()
+
+st.title("🛡️ AeroProof Command Center")
+st.caption("Status: ONLINE | User: Director | Recording: ACTIVE")
+
+weather = get_live_weather()
+wind_val = weather['windspeed']
+
+col1, col2, col3 = st.columns(3)
+with col1:
+    with st.container(border=True):
+        st.metric("Live Wind (Sutton)", f"{wind_val} km/h")
+        if wind_val > 30:
+            st.error("⛔ GATE CLOSED")
+        else:
+            st.success("✅ GATE OPEN")
+
+with col2:
+    with st.container(border=True):
+        st.subheader("🚁 Mission Identity")
+        st.text("ID: GBR-gc284pmztcrt-7-2ot")
+        st.text("Pilot: GBR-OP-pilot1")
+
+with col3:
+    with st.container(border=True):
+        st.subheader("📂 Operations")
+        if os.path.exists("docs"):
+            files = [f for f in os.listdir("docs") if f.endswith(".md")]
+            if files:
+                doc = st.selectbox("Select Protocol", files)
+                if st.button("Generate & Log Flight", type="primary"):
+                    pdf_data = generate_pdf(doc, "GBR-gc284pmztcrt-7-2ot", weather)
+                    log_mission("GBR-gc284pmztcrt-7-2ot", wind_val, weather['temperature'])
+                    st.download_button("Download PDF", pdf_data, "Flight_Cert.pdf", "application/pdf")
+                    st.success("Flight Logged")
+
+st.subheader("📼 Flight Recorder (Black Box)")
+col_log, col_map = st.columns([1, 1])
+
+with col_log:
+    with st.container(border=True):
+        if os.path.exists('mission_log.csv'):
+            df = pd.read_csv('mission_log.csv')
+            st.dataframe(df, use_container_width=True)
+            with open("mission_log.csv", "rb") as f:
+                st.download_button("💾 Export CSV", f, "log.csv", "text/csv")
+        else:
+            st.info("No flights recorded.")
+
+with col_map:
+    with st.container(border=True):
+        m = folium.Map(location=[51.36, -
