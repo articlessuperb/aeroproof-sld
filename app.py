@@ -64,7 +64,27 @@ if not st.session_state["auth"]:
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
         st.header("🛡️ AeroProof Director Access")
-        try:
+        
+        # --- ROBUST PASSWORD HANDLING ---
+        # This checks if secrets exist; if not, defaults to 'admin'
+        if "auth" in st.secrets:
             pass_key = st.secrets["auth"]["director_pass"]
-        except:
-            pass_key =
+        else:
+            pass_key = "admin"
+        
+        password = st.text_input("Access Key", type="password")
+        
+        if st.button("Log In", type="primary"):
+            if password == pass_key:
+                st.session_state["auth"] = True
+                st.rerun()
+            else:
+                st.error("Invalid Credentials")
+    st.stop()
+
+# --- 4. MAIN DASHBOARD ---
+# Logout Button (Sidebar)
+with st.sidebar:
+    st.header("System Controls")
+    st.write("Current Session: Active")
+    if st.button("🔴 Logout / Lock System", type="secondary", use_container_
