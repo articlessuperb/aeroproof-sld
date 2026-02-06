@@ -45,7 +45,6 @@ def generate_pdf(filename, mission_id, weather_data):
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
 
-    # Sanitise & Inject
     content = content.encode('latin-1', 'ignore').decode('latin-1')
     content = content.replace("{{mission_id}}", mission_id)
     content = content.replace("{{time}}", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
@@ -65,8 +64,6 @@ if not st.session_state["auth"]:
     with col2:
         st.header("🛡️ AeroProof Director Access")
         
-        # --- ROBUST PASSWORD HANDLING ---
-        # This checks if secrets exist; if not, defaults to 'admin'
         if "auth" in st.secrets:
             pass_key = st.secrets["auth"]["director_pass"]
         else:
@@ -76,15 +73,3 @@ if not st.session_state["auth"]:
         
         if st.button("Log In", type="primary"):
             if password == pass_key:
-                st.session_state["auth"] = True
-                st.rerun()
-            else:
-                st.error("Invalid Credentials")
-    st.stop()
-
-# --- 4. MAIN DASHBOARD ---
-# Logout Button (Sidebar)
-with st.sidebar:
-    st.header("System Controls")
-    st.write("Current Session: Active")
-    if st.button("🔴 Logout / Lock System", type="secondary", use_container_
