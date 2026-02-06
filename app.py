@@ -45,6 +45,7 @@ def generate_pdf(filename, mission_id, weather_data):
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
 
+    # Sanitise & Inject
     content = content.encode('latin-1', 'ignore').decode('latin-1')
     content = content.replace("{{mission_id}}", mission_id)
     content = content.replace("{{time}}", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
@@ -66,21 +67,4 @@ if not st.session_state["auth"]:
         try:
             pass_key = st.secrets["auth"]["director_pass"]
         except:
-            pass_key = "admin"
-        
-        password = st.text_input("Access Key", type="password")
-        if st.button("Log In", type="primary"):
-            if password == pass_key:
-                st.session_state["auth"] = True
-                st.rerun()
-            else:
-                st.error("Invalid Credentials")
-    st.stop()
-
-# --- 4. MAIN DASHBOARD ---
-# LOGOUT BUTTON IS HERE IN SIDEBAR
-with st.sidebar:
-    st.header("System Controls")
-    st.write("Current Session: Active")
-    if st.button("🔴 Logout / Lock System", type="secondary", use_container_width=True):
-        st.session_state["auth"] =
+            pass_key =
