@@ -101,7 +101,11 @@ else:
             st.success("### ✅ VERDICT: SAFE TO FLY")
             cert_id = f"SLD-FLEET-{datetime.now().strftime('%m%d-%H%M')}"
             cert_data = f"AeroProof Multi-Unit Certificate: {cert_id}\nStatus: APPROVED\nDirector: R. Murtagh"
-            st.download_button("Download Compliance Report", cert_data, file_name=f"{cert_id}.txt")import streamlit as st
+            # The download button should be on its own line
+st.download_button("Download Compliance Report", cert_data, file_name=f"{cert_id}.txt")
+
+# Ensure 'import streamlit as st' is ONLY at the very top of the file! 
+# (Delete the one at the end of the line above)
 import folium
 from streamlit_folium import st_folium
 import json
@@ -120,8 +124,7 @@ def get_doc(path):
     try:
         with open(path, 'r') as f: return f.read()
     except: return "Document not found."
-
-# --- THE RADAR MAP ENGINE ---
+om
 def create_command_map(site_data):
     # Center on HQ: Airport House, Croydon
     m = folium.Map(location=[51.356, -0.117], zoom_start=13, tiles="CartoDB dark_matter")
