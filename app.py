@@ -62,7 +62,7 @@ def generate_pdf(fname, mid, wx):
     pdf.multi_cell(0, 8, txt)
     return bytes(pdf.output())
 
-# --- LOGIN ---
+# --- LOGIN (FIXED) ---
 if "auth" not in st.session_state:
     st.session_state["auth"] = False
 
@@ -71,10 +71,12 @@ if not st.session_state["auth"]:
     with c2:
         st.header("AeroProof Login")
         
-        if "auth" in st.secrets:
+        # --- CRASH FIX START ---
+        try:
             key = st.secrets["auth"]["director_pass"]
-        else:
+        except:
             key = "admin"
+        # --- CRASH FIX END ---
         
         pwd = st.text_input("Password", type="password")
         
@@ -139,7 +141,6 @@ with c_log:
 
 with c_map:
     with st.container(border=True):
-        # VERTICAL FORMATTING TO PREVENT CUTOFFS
         m = folium.Map(
             location=[51.36, -0.19],
             zoom_start=13
