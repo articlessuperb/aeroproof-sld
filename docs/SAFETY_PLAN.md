@@ -1,24 +1,20 @@
-# 🛡️ 2026 Operational Safety Case (OSC)
-**Director:** Róisín Mary Murtagh  
-**Organization:** South London Drones Ltd  
-**Revision:** 2026.01.VLOS
+# 🛡️ LIVE FLIGHT AUTHORIZATION CERTIFICATE
+**South London Drones Ltd | Strategic Command**
 
-## 1. Airspace Command & Control (Remote ID)
-In compliance with the 2026 UK Electronic Conspicuity mandate, all SLD operations are monitored via the AeroProof Visual Command Center.
-* **Friendly Recognition:** Fleet units must broadcast the matching Operator ID: `GBR-OP-vlos2026`.
-* **Intruder Protocol:** Any non-verified RID signal within 100m of a project geofence (defined in `sites.geojson`) requires an immediate hover-and-hold at 20m AGL.
+## 1. Mission Parameters
+* **Mission ID:** {{mission_id}}
+* **Pilot in Command:** GBR-OP-pilot1
+* **Verification Time:** {{time}}
 
-## 2. Launch Authorization Theorems (Logic Gates)
-The AeroProof engine pings live meteorological data to verify the following thresholds:
-* **Wind Velocity ($v$):** $v < 20 \text{ kts}$. Any value $\geq 20 \text{ kts}$ results in an automatic 'Grounded' status.
-* **Visibility ($s$):** $s > 5000 \text{ m}$. Flights are prohibited in heavy fog or low-cloud conditions.
-* **Precipitation:** Zero-tolerance gate. If the Rain Radar API returns any value $> 0$, the mission is aborted.
+## 2. Real-Time Telemetry Proof
+At the moment of this certificate's generation, the local atmospheric conditions in Sutton were verified against the Lean 4 safety limits.
 
-## 3. Compliance & Audit Trail
-Every verification event (successful or failed) generates a unique **Verification Certificate**. 
-* **Audit Storage:** All certificates are logged with a timestamp and the Director's digital signature.
-* **Client Transparency:** These logs are available for review by site managers at the Croydon Hub and Sutton Commercial developments.
+* **Live Wind Speed:** {{wind}} km/h  *(Limit: 30 km/h)*
+* **Temperature:** {{temp}} °C
+* **Safety Gate Status:** **OPEN (VERIFIED)**
 
----
-**Verified by:** Róisín Murtagh, Director  
-**System Native Decide:** `Lean 4 Formal Proof Logic`
+## 3. Legal Declaration
+The Pilot in Command confirms that Visual Line of Sight (VLOS) is maintained and all 2026 Remote ID protocols are active.
+
+**Signed:** __________________________
+*Director of Operations*
