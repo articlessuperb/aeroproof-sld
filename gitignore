@@ -1,0 +1,6 @@
+# THE SHIELD - Do not upload secrets to GitHub
+.streamlit/
+secrets.toml
+__pycache__/
+*.pyc
+.DS_Store

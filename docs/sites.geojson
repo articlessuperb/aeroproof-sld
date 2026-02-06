@@ -1,0 +1,60 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "HQ: Airport House, Croydon",
+        "site_id": "SLD-HQ-01",
+        "risk_profile": "Low",
+        "description": "Primary base of operations and fleet maintenance."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.1174, 51.3562]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Croydon Construction Hub",
+        "site_id": "SLD-SITE-ALPHA",
+        "risk_profile": "High",
+        "description": "Active development zone. High crane density."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-0.1000, 51.3700],
+            [-0.0950, 51.3700],
+            [-0.0950, 51.3730],
+            [-0.1000, 51.3730],
+            [-0.1000, 51.3700]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sutton Commercial Development",
+        "site_id": "SLD-SITE-BETA",
+        "risk_profile": "Medium",
+        "description": "Property survey zone. Restricted urban airspace."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-0.1950, 51.3620],
+            [-0.1850, 51.3620],
+            [-0.1850, 51.3680],
+            [-0.1950, 51.3680],
+            [-0.1950, 51.3620]
+          ]
+        ]
+      }
+    }
+  ]
+}
