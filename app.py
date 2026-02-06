@@ -8,133 +8,125 @@ import pandas as pd
 from datetime import datetime
 import requests
 
-# --- 1. CONFIGURATION ---
+# --- CONFIG ---
 st.set_page_config(
-    page_title="AeroProof Enterprise",
-    layout="wide",
-    page_icon="🛡️"
+    page_title="AeroProof",
+    layout="wide"
 )
 
-# --- 2. BACKEND ENGINES ---
+# --- ENGINES ---
 def get_live_weather():
     try:
-        # Broken into shorter lines for safety
-        lat = "51.36"
-        lon = "-0.19"
-        base_url = "https://api.open-meteo.com/v1/forecast"
-        query = f"?latitude={lat}&longitude={lon}&current_weather=true"
-        response = requests.get(base_url + query)
-        data = response.json()
-        return data['current_weather']
+        url = "https://api.open-meteo.com/v1/forecast"
+        params = "?latitude=51.36&longitude=-0.19&current_weather=true"
+        resp = requests.get(url + params)
+        return resp.json()['current_weather']
     except:
         return {"windspeed": 0, "temperature": 0}
 
-def log_mission(mission_id, wind, temp):
-    file = 'mission_log.csv'
-    exists = os.path.isfile(file)
-    with open(file, 'a', newline='') as f:
-        writer = csv.writer(f)
+def log_mission(mid, wind, temp):
+    f_name = 'mission_log.csv'
+    exists = os.path.isfile(f_name)
+    with open(f_name, 'a', newline='') as f:
+        w = csv.writer(f)
         if not exists:
-            headers = ['Timestamp', 'Mission ID', 'Wind', 'Temp', 'Status']
-            writer.writerow(headers)
+            w.writerow(['Time', 'ID', 'Wind', 'Temp', 'Status'])
         
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        status = "Authorized" if wind < 30 else "WARNING"
-        writer.writerow([now, mission_id, wind, temp, status])
+        stat = "Authorized" if wind < 30 else "WARNING"
+        w.writerow([now, mid, wind, temp, stat])
 
-def generate_pdf(filename, mission_id, weather_data):
+def generate_pdf(fname, mid, wx):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Helvetica", 'B', 16)
-    pdf.cell(0, 10, "AeroProof Strategic Command", ln=True, align='C')
+    pdf.cell(0, 10, "AeroProof Command", ln=True, align='C')
     pdf.ln(10)
     
-    path = os.path.join("docs", filename)
-    content = "Error: File not found."
+    path = os.path.join("docs", fname)
+    txt = "Error: File missing."
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as f:
-            content = f.read()
+            txt = f.read()
 
-    # Sanitise
-    content = content.encode('latin-1', 'ignore').decode('latin-1')
+    # Clean & Inject
+    txt = txt.encode('latin-1', 'ignore').decode('latin-1')
+    now = datetime.now().strftime("%Y-%m-%d")
     
-    # Inject
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    content = content.replace("{{mission_id}}", mission_id)
-    content = content.replace("{{time}}", now_str)
-    content = content.replace("{{wind}}", str(weather_data['windspeed']))
-    content = content.replace("{{temp}}", str(weather_data['temperature']))
+    txt = txt.replace("{{mission_id}}", mid)
+    txt = txt.replace("{{time}}", now)
+    txt = txt.replace("{{wind}}", str(wx['windspeed']))
+    txt = txt.replace("{{temp}}", str(wx['temperature']))
     
     pdf.set_font("Helvetica", size=11)
-    pdf.multi_cell(0, 8, content)
+    pdf.multi_cell(0, 8, txt)
     return bytes(pdf.output())
 
-# --- 3. LOGIN GATE ---
+# --- LOGIN ---
 if "auth" not in st.session_state:
     st.session_state["auth"] = False
 
 if not st.session_state["auth"]:
     c1, c2, c3 = st.columns([1,2,1])
     with c2:
-        st.header("🛡️ AeroProof Access")
+        st.header("AeroProof Login")
         
         if "auth" in st.secrets:
-            pass_key = st.secrets["auth"]["director_pass"]
+            key = st.secrets["auth"]["director_pass"]
         else:
-            pass_key = "admin"
+            key = "admin"
         
-        pwd = st.text_input("Key", type="password")
+        pwd = st.text_input("Password", type="password")
         
         if st.button("Log In", type="primary"):
-            if pwd == pass_key:
+            if pwd == key:
                 st.session_state["auth"] = True
                 st.rerun()
             else:
                 st.error("Invalid")
     st.stop()
 
-# --- 4. MAIN DASHBOARD ---
+# --- DASHBOARD ---
 with st.sidebar:
     st.header("Controls")
-    if st.button("🔴 Logout", use_container_width=True):
+    if st.button("Logout", use_container_width=True):
         st.session_state["auth"] = False
         st.rerun()
 
-st.title("🛡️ AeroProof Command Center")
-st.caption("Status: ONLINE | User: Director")
+st.title("🛡️ AeroProof Command")
 
-weather = get_live_weather()
-wind_val = weather['windspeed']
+wx = get_live_weather()
+wind = wx['windspeed']
 
 c1, c2, c3 = st.columns(3)
 with c1:
     with st.container(border=True):
-        st.metric("Live Wind", f"{wind_val} km/h")
-        if wind_val > 30:
-            st.error("⛔ GATE CLOSED")
+        st.metric("Wind", f"{wind} km/h")
+        if wind > 30:
+            st.error("CLOSED")
         else:
-            st.success("✅ GATE OPEN")
+            st.success("OPEN")
 
 with c2:
     with st.container(border=True):
-        st.subheader("🚁 Mission Identity")
-        st.text("ID: GBR-gc284pmztcrt-7-2ot")
-        st.text("Pilot: GBR-OP-pilot1")
+        st.subheader("Mission")
+        st.text("ID: GBR-gc284-7")
+        st.text("Pilot: GBR-OP-1")
 
 with c3:
     with st.container(border=True):
-        st.subheader("📂 Operations")
+        st.subheader("Docs")
         if os.path.exists("docs"):
             files = [f for f in os.listdir("docs") if f.endswith(".md")]
             if files:
-                doc = st.selectbox("Select Protocol", files)
-                if st.button("Generate & Log", type="primary"):
-                    pdf = generate_pdf(doc, "GBR-gc284pmztcrt-7-2ot", weather)
-                    log_mission("GBR-gc284pmztcrt-7-2ot", wind_val, weather['temperature'])
-                    st.download_button("Download PDF", pdf, "Cert.pdf")
-                    st.success("Logged")
+                d = st.selectbox("Select", files)
+                if st.button("Generate", type="primary"):
+                    data = generate_pdf(d, "GBR-gc284", wx)
+                    log_mission("GBR-gc284", wind, wx['temperature'])
+                    st.download_button("Download", data, "Cert.pdf")
+                    st.success("Done")
 
-st.subheader("📼 Flight Recorder")
+st.subheader("Black Box")
 c_log, c_map = st.columns([1, 1])
 
 with c_log:
@@ -142,12 +134,22 @@ with c_log:
         if os.path.exists('mission_log.csv'):
             df = pd.read_csv('mission_log.csv')
             st.dataframe(df, use_container_width=True)
-            with open("mission_log.csv", "rb") as f:
-                st.download_button("💾 Export CSV", f, "log.csv")
         else:
-            st.info("No flights recorded.")
+            st.info("No logs.")
 
 with c_map:
     with st.container(border=True):
-        # THIS WAS THE PROBLEM LINE - NOW FIXED
-        m = folium.Map(location=[51.36, -0.19
+        # VERTICAL FORMATTING TO PREVENT CUTOFFS
+        m = folium.Map(
+            location=[51.36, -0.19],
+            zoom_start=13
+        )
+        
+        folium.Circle(
+            location=[51.36, -0.19], 
+            radius=1200, 
+            color="blue", 
+            fill=True
+        ).add_to(m)
+        
+        st_folium(m, height=300, use_container_width=True)
