@@ -1,67 +1,59 @@
 import streamlit as st
 import folium
 from streamlit_folium import st_folium
-import json
+from fpdf import FPDF
+import os
 from datetime import datetime
-import requests
 
-# --- 1. PAGE CONFIG & THEME ---
-st.set_page_config(page_title="AeroProof SLD Dashboard", page_icon="🛡️", layout="wide")
+# --- 1. CONFIGURATION & CSS STYLING ---
+st.set_page_config(page_title="AeroProof Enterprise", layout="wide", page_icon="🛡️")
 
-st.title("🛡️ AeroProof: South London Drones")
-st.markdown("### 2026 UK Compliance & Safety Gate Verification")
+# High-Integrity "HUD" CSS
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;600&display=swap');
 
-# --- 2. LOAD SECRETS ---
-# Note: These are pulled from your Streamlit Cloud "Secrets" dashboard, NOT GitHub.
-try:
-    FLEET_IDS = st.secrets["auth"]["fleet_ids"]
-    WEATHER_KEY = st.secrets["api"]["weather_key"]
-except Exception:
-    st.error("Missing Secrets! Please add them to the Streamlit Cloud Dashboard.")
-    st.stop()
+    /* Global Dark Theme */
+    .stApp {
+        background: radial-gradient(circle at top, #0d1b2a 0%, #050a14 100%);
+        color: #e0e6ed;
+    }
 
-# --- 3. SAFETY GATE LOGIC (LEAN 4 VERIFIED) ---
-# Logic: Flight is ONLY permitted if Wind Speed < 20 knots.
-def check_safety_gate(wind_speed):
-    SAFE_THRESHOLD = 20.0
-    return wind_speed < SAFE_THRESHOLD
+    /* Glassmorphic Card Containers */
+    div[data-testid="stVerticalBlock"] > div > div[data-testid="stVerticalBlock"] {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Typography */
+    h1, h2, h3 { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; color: white; margin-bottom: 0px;}
+    p, label, .stMarkdown { font-family: 'Inter', sans-serif; color: #a0aec0; }
+    
+    /* Metrics */
+    div[data-testid="stMetricValue"] {
+        font-family: 'Orbitron', sans-serif;
+        color: #00d2ff !important;
+        font-size: 2.2rem !important;
+    }
+    div[data-testid="stMetricLabel"] { color: #8892b0 !important; }
 
-# --- 4. WEATHER INTEGRATION (SUTTON/CROYDON) ---
-def get_weather():
-    # Coordinates for South London (Sutton/Croydon area)
-    url = f"http://api.openweathermap.org/data/2.5/weather?lat=51.36&lon=-0.19&appid={WEATHER_KEY}&units=imperial"
-    response = requests.get(url).json()
-    wind_mph = response.get("wind", {}).get("speed", 0)
-    # Convert MPH to Knots for AeroProof Standards
-    wind_knots = wind_mph * 0.868976
-    return wind_knots
+    /* Custom Badges */
+    .verified-badge {
+        background-color: rgba(0, 255, 136, 0.1);
+        border: 1px solid #00ff88;
+        color: #00ff88;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.8rem;
+        display: inline-block;
+        margin-top: 10px;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-current_wind = get_weather()
-is_safe = check_safety_gate(current_wind)
-
-# --- 5. SIDEBAR: FLEET SELECTION ---
-st.sidebar.header("Drone Fleet Management")
-selected_drone = st.sidebar.selectbox("Select Active Pilot/Drone", FLEET_IDS)
-
-# --- 6. MAIN DASHBOARD ---
-col1, col2 = st.columns(2)
-
-with col1:
-    st.metric("Current Wind Speed (Knots)", f"{current_wind:.2f} kts")
-    if is_safe:
-        st.success("✅ SAFETY GATE OPEN: Weather conditions within verified limits.")
-    else:
-        st.error("🚫 SAFETY GATE CLOSED: Wind exceeds 20 knot safety threshold.")
-
-with col2:
-    st.info(f"**Active Mission:** {selected_drone}")
-    st.write("Verification Logic: `docs/VERIFICATION_LOGIC.md` (Lean 4)")
-
-# --- 7. THE MAP (RAIN RADAR SIMULATION) ---
-st.subheader("Live Rain Radar: Sutton & Croydon Sector")
-m = folium.Map(location=[51.36, -0.19], zoom_start=12)
-
-# Ensure this entire line is intact:
-folium.Marker([51.36, -0.19], popup="Sutton Base", icon=folium.Icon(color='blue')).add_to(m)
-
-st_folium(m, width=700, height=500)
+# --- 2. BACKEND LOGIC (PDF ENGINE) ---
